@@ -238,7 +238,6 @@ class TimerWindow:
 
     def on_enter(self, event):
         if not self.timer_running:
-            # Delay the display of the buttons by 1000 milliseconds (1 second)
             self.hover_delay_id = self.frame.after(300, self.show_buttons)
 
     def on_enter_button(self, event):
