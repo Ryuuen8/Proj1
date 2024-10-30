@@ -184,11 +184,19 @@ class TimerWindow:
         self.current_song = None
 
     def on_close(self):
-        pygame.mixer.music.stop()
-
         if hasattr(self, 'after_id'):
             self.root.after_cancel(self.after_id)
+            del self.after_id
+        pygame.mixer.music.stop()
 
+        # Close any child windows if they exist
+        if hasattr(self, 'timer_window'):
+            self.timer_window.root.destroy()
+        if hasattr(self, 'o1_window'):
+            self.o1_window.root.destroy()
+
+        # Destroy the Option window
+        self.root.quit()
         self.root.destroy()
 
     def question_button(self):
@@ -238,6 +246,7 @@ class TimerWindow:
 
     def on_enter(self, event):
         if not self.timer_running:
+            # Delay the display of the buttons by 1000 milliseconds (1 second)
             self.hover_delay_id = self.frame.after(300, self.show_buttons)
 
     def on_enter_button(self, event):
@@ -814,8 +823,9 @@ class Option:
         self.yes_label.configure(text_color="#000000")
 
     def yes_button(self):
-        self.timer_window = TimerWindow(self.root, self.shared_data)
-        self.timer_window.start_timer()
+        if not hasattr(self, 'timer_window') or not self.timer_window.root.winfo_exists():
+            self.timer_window = TimerWindow(self.root, self.shared_data)
+            self.timer_window.start_timer()
         self.hide_widgets([self.o_frame])
 
     def hide_widgets(self, widgets):
@@ -832,9 +842,14 @@ class Option:
             self.root.after_cancel(self.after_id)
             del self.after_id
         pygame.mixer.music.stop()
-        for widget in self.root.winfo_children():
-            widget.destroy()
 
+        # Close any child windows if they exist
+        if hasattr(self, 'timer_window'):
+            self.timer_window.root.destroy()
+        if hasattr(self, 'o1_window'):
+            self.o1_window.root.destroy()
+
+        # Destroy the Option window
         self.root.quit()
         self.root.destroy()
 
@@ -910,10 +925,10 @@ class Option1:
         self.root.withdraw()
 
     def no_button(self):
+        if not hasattr(self, 'timer_window') or not self.timer_window.root.winfo_exists():
+            self.timer_window = TimerWindow(self.root, self.shared_data)
+            self.timer_window.start_timer()
         self.hide_widgets([self.o1_frame])
-        self.timer_window = TimerWindow(self.root, self.shared_data)
-        self.timer_window.start_timer()
-        self.timer_window.reset_buttons()
 
     def hide_widgets(self, widgets):
         for widget in widgets:
@@ -1004,10 +1019,10 @@ class FOption:
         self.yes_label.configure(text_color="#000000")
 
     def no_button(self):
+        if not hasattr(self, 'timer_window') or not self.timer_window.root.winfo_exists():
+            self.timer_window = TimerWindow(self.root, self.shared_data)
+            self.timer_window.start_timer()
         self.hide_widgets([self.fo_frame])
-        self.timer_window = TimerWindow(self.root, self.shared_data)
-        self.timer_window.start_timer()
-        self.timer_window.reset_buttons()
 
     def hide_widgets(self, widgets):
         for widget in widgets:
@@ -1218,8 +1233,8 @@ class Ringtone:
                 print("No ringtones available to select.")
 
         def prev_window(self):
-            self.timer_window = TimerWindow(self.root, self.shared_data)
-            self.timer_window.reset_buttons()
+            if not hasattr(self, 'timer_window') or not self.timer_window.root.winfo_exists():
+                self.timer_window = TimerWindow(self.root, self.shared_data)
             self.hide_widget1([self.label_frame, self.question_label, self.random_button, self.ringtone_label,
                                self.next_button1, self.prev_button, self.play_button, self.stop_button,
                                self.select_button, self.next_button, self.frame, self.add_button, self.vl_frame,
